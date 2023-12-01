@@ -1,11 +1,10 @@
 ﻿abstract class d01
 {
-    protected abstract string inputFile { get; }
     protected List<string> lines = new List<string>();
 
     public void Run()
     {
-        lines = File.ReadLines(inputFile).ToList();
+        lines = File.ReadLines(@"..\..\..\inputs\01.txt").ToList();
 
         Count();
     }
@@ -15,7 +14,6 @@
 
 class d01_1 : d01
 {
-    protected override string inputFile => @"..\..\..\inputs\01_1.txt";
     protected override void Count()
     {
         var sum = 0;
@@ -31,8 +29,6 @@ class d01_1 : d01
 
 class d01_2 : d01
 {
-    protected override string inputFile => @"..\..\..\inputs\01_2.txt";
-  
     private Dictionary<string, int> words = new Dictionary<string, int>()
     {
         { "zero", 0 },
@@ -50,10 +46,36 @@ class d01_2 : d01
     protected override void Count()
     {
         var sum = 0;
+
         foreach (var line in lines)
         {
-            var d1 = words[words.Keys.First(w => line.IndexOf(w) > -1)];
-            var d2 = words[words.Keys.First(w => line.LastIndexOf(w) > -1)];
+            var d1 = -1;
+            var d2 = -1;
+            
+            for (int i = 0; i < line.Length; i++)
+            {
+                var c = line[i];
+                if (char.IsDigit(c))
+                {
+                    var d = c - 0x30;
+                    if (d1 == -1)
+                    {
+                        d1 = d;
+                    }
+                    d2 = d;
+                }
+
+                if (words.Keys.Any(w => line.Substring(i).StartsWith(w)))
+                {
+                    var d = words[words.Keys.Single(w => line.Substring(i).StartsWith(w))];
+                    if (d1 == -1)
+                    {
+                        d1 = d;
+                    }
+                    d2 = d;
+                }
+            }
+
             sum += d1 * 10 + d2;
         }
         Console.WriteLine(sum);
