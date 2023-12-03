@@ -1,6 +1,4 @@
-﻿using aoc;
-
- class d02 : baseD
+﻿ class d02 : baseD
 {
     protected Dictionary<string, int> cubes = new Dictionary<string, int>() { { "blue", 14 }, { "red", 12 }, { "green", 13 }, };
 
