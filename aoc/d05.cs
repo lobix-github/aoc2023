@@ -29,7 +29,7 @@
         }
 
         var mins = new List<long>();
-        seeds.ForEach(seed => mins.Add(Count(seed, 1, false).First()));
+        seeds.ForEach(seed => mins.Add(Count(seed, 1).First()));
         Console.WriteLine(mins.Min()); // part 1
 
         mins = new List<long>();
@@ -37,13 +37,13 @@
         {
             var start = seeds[i * 2];
             var count = seeds[i * 2 + 1];
-            var transformedSeeds = Count(start, count, true);
+            var transformedSeeds = Count(start, count);
             mins.Add(transformedSeeds.Min());
         }
         Console.WriteLine(mins.Min()); // part 2
     }
 
-    IEnumerable<long> Count(long start, long count, bool doAdvance)
+    IEnumerable<long> Count(long start, long count)
     {
         for (long i = start; i < start + count; i++)
         {
@@ -54,11 +54,7 @@
                 (seed, advance) = transformer.Transform(seed, advance);
             }
             yield return seed;
-
-            if (doAdvance)
-            {
-                i += advance;
-            }
+            i += advance - 1;
         };
     }
 }
