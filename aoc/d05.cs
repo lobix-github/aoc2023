@@ -29,47 +29,40 @@
         }
 
         var mins = new List<long>();
-        Count(seeds, mins);
+        seeds.ForEach(seed => mins.Add(Count(seed, 1, false).First()));
         Console.WriteLine(mins.Min()); // part 1
 
         mins = new List<long>();
         for (int i = 0; i < seeds.Count / 2; i++)
         {
-            var moreSeeds = new List<long>();
-            var transformedSeeds = new List<long>();
             var start = seeds[i * 2];
             var count = seeds[i * 2 + 1];
-            for (long j = start; j < start + count; j++)
-            {
-                moreSeeds.Add(j);
-            }
-            Count(moreSeeds, transformedSeeds, $"iteration {i} of {seeds.Count / 2 - 1}, ");
+            var transformedSeeds = Count(start, count, true);
             mins.Add(transformedSeeds.Min());
         }
         Console.WriteLine(mins.Min()); // part 2
     }
 
-    void Count(IEnumerable<long> seeds, IList<long> collection, string prefix = "")
+    IEnumerable<long> Count(long start, long count, bool doAdvance)
     {
-        long idx = 0;
-        long len = seeds.Count(); 
-        seeds.AsParallel().ForAll(seed =>
+        for (long i = start; i < start + count; i++)
         {
-            idx++;
-            if (idx % 1_000_000 == 0)
-            {
-                Console.WriteLine($"{prefix}idx {idx} of {len} ({(int)(((double)idx / 1000) / ((double)len / 1000) * 100)}%)");
-            }
-
+            var seed = i;
+            long advance = long.MaxValue;
             foreach (var transformer in transformers)
             {
-                seed = transformer.Transform(seed);
+                (seed, advance) = transformer.Transform(seed, advance);
             }
             lock (this)
             {
-                collection.Add(seed);
+                yield return seed;
             }
-        });
+
+            if (doAdvance)
+            {
+                i += (int)advance - 1;
+            }
+        };
     }
 }
 
@@ -79,15 +72,23 @@ class Transformer
 
     public void Add(TrInfo info) => infos.Add(info);
 
-    public long Transform(long seed)
+    public (long, long) Transform(long seed, long advance)
     {
         var info = infos.FirstOrDefault(info => info.IsInRange(seed));
-        return info != default ? info.Transform(seed) : seed;
+        if (info != default)
+        {
+            return info.Transform(seed, advance);
+        }
+        else 
+        {
+            var adv = infos.OrderBy(i => i.source).FirstOrDefault(i => i.source > seed, new TrInfo(-1, long.MaxValue, -1)).source;
+            return (seed, Math.Min(advance, adv)); 
+        }
     }
 }
 
 record struct TrInfo(long dest, long source, long len)
 {
     public bool IsInRange(long seed) => seed >= source && seed < source + len;
-    public long Transform(long seed) => seed + (dest - source);
+    public (long, long) Transform(long seed, long advance) => (seed + (dest - source), Math.Min(source + len - seed, advance));
 }
