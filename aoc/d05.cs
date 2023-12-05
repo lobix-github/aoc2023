@@ -53,10 +53,7 @@
             {
                 (seed, advance) = transformer.Transform(seed, advance);
             }
-            lock (this)
-            {
-                yield return seed;
-            }
+            yield return seed;
 
             if (doAdvance)
             {
