@@ -57,7 +57,7 @@
 
             if (doAdvance)
             {
-                i += (int)advance - 1;
+                i += advance;
             }
         };
     }
