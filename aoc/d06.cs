@@ -6,8 +6,8 @@
         var times = new List<int>(lines[0].Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(ToInt));
         var dists = new List<int>(lines[1].Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(ToInt));
 
-        var result = 1;
-        var wins = 0;
+        long result = 1;
+        long wins = 0;
         for (int i = 0; i < times.Count; i++)
         {
             wins = 0;
@@ -30,5 +30,20 @@
             if (dist2 > bigDist) wins++;
         }
         Console.WriteLine(wins); // part 2
+
+        wins = 0;
+        for (var t = 0; t < bigTime; t++)
+        {
+            var dist2 = t * (bigTime - t);
+            if (dist2 > bigDist) break;
+            wins++;
+        }
+        for (var t = bigTime - 1; t >= 0; t--)
+        {
+            var dist2 = t * (bigTime - t);
+            if (dist2 > bigDist) break;
+            wins++;
+        }
+        Console.WriteLine(bigTime - wins); // part 2
     }
 }
