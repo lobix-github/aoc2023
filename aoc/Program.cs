@@ -6,3 +6,4 @@ new d03_2().Run();
 new d04().Run();
 new d05().Run();
 new d06().Run();
+new d07().Run();
