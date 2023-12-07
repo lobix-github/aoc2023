@@ -87,7 +87,7 @@
                 return isHigh(x.Item1) ? 1 : -1;
             }
 
-            return x.Item1.CompareTo(y.Item1);
+            throw new Exception("not expected to reach this point");
         }));
     }
 }
