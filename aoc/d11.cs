@@ -3,15 +3,15 @@
     public void Run()
     {
         var plain = File.ReadLines(@"..\..\..\inputs\11.txt").ToList();
-        var galaxies = new List<Galaxy>();
+        var rows = new List<int>();
+        var cols = new List<int>();
 
         for (int y = 0; y < plain.Count; y++)
         {
             var row = plain[y];
             if (row.Select(x => x).All(x => x == '.'))
             {
-                plain.Insert(y, row);
-                y++;
+                rows.Add(y);
             }
         }
         for (int x = 0; x < plain[0].Count(); x++)
@@ -19,35 +19,48 @@
             var col = plain.Select(row => row[x]).ToList();
             if (col.All(x => x == '.'))
             {
-                for (int y = 0; y < plain.Count; y++)
-                {
-                    plain[y] = plain[y].Insert(x, ".");
-                }
-                x++;
+                cols.Add(x);
             }
         }
 
-        for (int y = 0; y < plain.Count; y++)
+        var galaxies = getGalaxies(2);
+        Console.WriteLine(count(galaxies.ToArray())); // part 1
+        galaxies = getGalaxies(1000000);
+        Console.WriteLine(count(galaxies.ToArray())); // part 2
+
+        IEnumerable<Galaxy> getGalaxies(int shift)
         {
-            var row = plain[y];
-            for (int x = 0; x < row.Length; x++)
+            for (int y = 0; y < plain.Count; y++)
             {
-                if (row[x] == '#')
+                var row = plain[y];
+                for (int x = 0; x < row.Length; x++)
                 {
-                    galaxies.Add(new Galaxy(x, y));
+                    if (row[x] == '#')
+                    {
+                        var xs = cols.Where(c => c <= x);
+                        var x1 = x + xs.Count() * (shift - 1);
+
+                        var ys = rows.Where(r => r <= y);
+                        var y1 = y + ys.Count() * (shift - 1);
+
+                        yield return new Galaxy(x1, y1);
+                    }
                 }
             }
         }
 
-        var sum = 0;
-        for (int i = 0; i < galaxies.Count; i++)
+        long count(Galaxy[] galaxies)
         {
-            for (int j = i + 1; j < galaxies.Count; j++)
+            long sum = 0;
+            for (int i = 0; i < galaxies.Count(); i++)
             {
-                sum += Math.Abs(galaxies[i].x - galaxies[j].x) + Math.Abs(galaxies[i].y - galaxies[j].y);
+                for (int j = i + 1; j < galaxies.Count(); j++)
+                {
+                    sum += Math.Abs(galaxies[i].x - galaxies[j].x) + Math.Abs(galaxies[i].y - galaxies[j].y);
+                }
             }
+            return sum;
         }
-        Console.WriteLine(sum); // part 1
     }
 
     record struct Galaxy(int x, int y);
