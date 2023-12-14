@@ -23,4 +23,4 @@ abstract class baseD
     }
 }
 
-record struct DPoint(int x, int y);
+public record struct DPoint(int x, int y);

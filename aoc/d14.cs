@@ -1,20 +1,227 @@
-﻿class d14 : baseD
+﻿using System.IO;
+using System.Text;
+
+class d14 : baseD
 {
     public void Run()
     {
-        long sum = 0;
-        var lines = rotate(File.ReadLines(@"..\..\..\inputs\14.txt").ToList());
-        foreach (var line in lines)
+        var lines = File.ReadLines(@"..\..\..\inputs\14.txt").ToList();
+
+        moveU(lines);
+        var sum = getSum(lines);
+        Console.WriteLine(sum); // part 1
+
+        lines = File.ReadLines(@"..\..\..\inputs\14.txt").ToList();
+        var cache = new Dictionary<int, int>();
+        var cycle = 1;
+        while (cycle <= 1_000_000_000)
         {
-            var counter = line.Length;
-            for (int i = 0; i < line.Length; i++)
+            doCycle();
+
+            var id = getPoints(lines).GetHash();
+
+            if (cache.TryGetValue(id, out var cached))
             {
-                if (line[i] == 'O')
-                    sum += counter--;
-                else if (line[i] == '#')
-                    counter = line.Length - i - 1;
+                var remaining = 1_000_000_000 - cycle - 1;
+                var loop = cycle - cached;
+
+                var loopRemaining = remaining % loop;
+                cycle = 1_000_000_000 - loopRemaining - 1;
+            }
+
+            cache[id] = cycle++;
+        }
+        sum = getSum(lines);
+        Console.WriteLine(sum); // part 2
+
+        void doCycle()
+        {
+            moveU(lines);
+            moveL(lines);
+            moveD(lines);
+            moveR(lines);
+        }
+
+        void moveU(List<string> lines)
+        {
+            for (int x = 0; x < lines[0].Length; x++)
+            {
+                var col = lines.Select(l => l[x]).ToArray();
+                var freeSpots = new List<int>();
+                for (int y = 0; y < col.Length; y++)
+                {
+                    if (col[y] == '.')
+                    {
+                        freeSpots.Add(y);
+                    }
+                    else if (col[y] == '#')
+                    {
+                        freeSpots.Clear();
+                    }
+                    else if (col[y] == 'O')
+                    {
+                        if (freeSpots.Any())
+                        {
+                            var sb = new StringBuilder(new string(col));
+                            sb[y] = '.';
+                            sb[freeSpots[0]] = 'O';
+                            freeSpots.RemoveAt(0);
+                            freeSpots.Add(y);
+                            col = sb.ToString().ToCharArray();
+                        }
+                    }
+                }
+                for (int y = 0; y < col.Length; y++)
+                {
+                    var sb = new StringBuilder(lines[y]);
+                    sb[x] = col[y];
+                    lines[y] = sb.ToString();
+                }
             }
         }
-        Console.WriteLine(sum); // part 1
+
+        void moveD(List<string> lines)
+        {
+            for (int x = 0; x < lines[0].Length; x++)
+            {
+                var col = lines.Select(l => l[x]).ToArray();
+                var freeSpots = new List<int>();
+                for (int y = col.Length - 1; y >= 0; y--)
+                {
+                    if (col[y] == '.')
+                    {
+                        freeSpots.Add(y);
+                    }
+                    else if (col[y] == '#')
+                    {
+                        freeSpots.Clear();
+                    }
+                    else if (col[y] == 'O')
+                    {
+                        if (freeSpots.Any())
+                        {
+                            var sb = new StringBuilder(new string(col));
+                            sb[y] = '.';
+                            sb[freeSpots[0]] = 'O';
+                            freeSpots.RemoveAt(0);
+                            freeSpots.Add(y);
+                            col = sb.ToString().ToCharArray();
+                        }
+                    }
+                }
+                for (int y = 0; y < col.Length; y++)
+                {
+                    var sb = new StringBuilder(lines[y]);
+                    sb[x] = col[y];
+                    lines[y] = sb.ToString();
+                }
+            }
+        }
+
+        void moveL(List<string> lines)
+        {
+            for (int y = 0; y < lines.Count; y++)
+            {
+                var line = lines[y];
+                var freeSpots = new List<int>();
+                for (int i = 0; i < line.Length; i++)
+                {
+                    if (line[i] == '.')
+                    {
+                        freeSpots.Add(i);
+                    }
+                    else if (line[i] == '#')
+                    {
+                        freeSpots.Clear();
+                    }
+                    else if (line[i] == 'O')
+                    {
+                        if (freeSpots.Any())
+                        {
+                            var sb = new StringBuilder(line);
+                            sb[i] = '.';
+                            sb[freeSpots[0]] = 'O';
+                            freeSpots.RemoveAt(0);
+                            freeSpots.Add(i);
+                            line = sb.ToString();
+                        }
+                    }
+                }
+                lines[y] = line;
+            }
+        }
+
+        void moveR(List<string> lines)
+        {
+            for (int y = 0; y < lines.Count; y++)
+            {
+                var line = lines[y];
+                var freeSpots = new List<int>();
+                for (int i = line.Length - 1; i >= 0 ; i--)
+                {
+                    if (line[i] == '.')
+                    {
+                        freeSpots.Add(i);
+                    }
+                    else if (line[i] == '#')
+                    {
+                        freeSpots.Clear();
+                    }
+                    else if (line[i] == 'O')
+                    {
+                        if (freeSpots.Any())
+                        {
+                            var sb = new StringBuilder(line);
+                            sb[i] = '.';
+                            sb[freeSpots[0]] = 'O';
+                            freeSpots.RemoveAt(0);
+                            freeSpots.Add(i);
+                            line = sb.ToString();
+                        }
+                    }
+                }
+                lines[y] = line;
+            }
+        }
+
+        HashSet<DPoint> getPoints(List<string> lines)
+        {
+            var result = new HashSet<DPoint>();
+            for (int y = 0; y < lines.Count; y++)
+            {
+                var line = lines[y];
+                for (int x = 0; x < line.Length; x++)
+                {
+                    if (line[x] == 'O')
+                    {
+                        result.Add(new DPoint(x, y));
+                    }
+                }
+            }
+            return result;
+        }
+
+        int getSum(List<string> lines)
+        {
+            int sum = 0;
+            for (var i = lines.Count; i > 0; i--)
+            {
+                sum += lines[^i].Count(c => c == 'O') * i;
+            }
+            return sum;
+        }
+    }
+}
+
+public static class ExtsD14
+{
+    public static int GetHash(this HashSet<DPoint> points)
+    {
+        var hash = 0;
+        foreach (var point in points)
+        {
+            hash ^= point.GetHashCode();
+        }
+        return hash;
     }
 }
