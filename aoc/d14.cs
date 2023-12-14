@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 
 class d14 : baseD
 {
@@ -15,7 +14,7 @@ class d14 : baseD
         loopCycle(1_000_000_000, () =>
         {
             doCycle();
-            return getPoints(lines).GetHash();
+            return GetHash(getPoints(lines));
         });
         sum = getSum(lines);
         Console.WriteLine(sum); // part 2
@@ -187,27 +186,7 @@ class d14 : baseD
             return result;
         }
 
-        int getSum(List<string> lines)
-        {
-            int sum = 0;
-            for (var i = 0; i < lines.Count; i++)
-            {
-                sum += lines[i].Count(c => c == 'O') * (lines.Count - i);
-            }
-            return sum;
-        }
-    }
-}
-
-public static class ExtsD14
-{
-    public static int GetHash(this HashSet<DPoint> points)
-    {
-        var hash = 0;
-        foreach (var point in points)
-        {
-            hash ^= point.GetHashCode();
-        }
-        return hash;
+        int getSum(List<string> lines) => lines.Select((l, i) => (l, i)).Sum(x => x.l.Count(c => c == 'O') * (lines.Count - x.i));
+        int GetHash(HashSet<DPoint> points) => points.Aggregate(0, (hash, point) => hash ^= point.GetHashCode());
     }
 }
