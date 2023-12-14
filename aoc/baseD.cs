@@ -21,6 +21,27 @@ abstract class baseD
 
         return result;
     }
+
+    protected void loopCycle<T>(int count, Func<T> jobReturningCacheKey)
+    {
+        var cache = new Dictionary<T, int>();
+        var cycle = 1;
+        while (cycle <= count)
+        {
+            var id = jobReturningCacheKey();
+
+            if (cache.TryGetValue(id, out var cached))
+            {
+                var remaining = count - cycle - 1;
+                var loop = cycle - cached;
+
+                var loopRemaining = remaining % loop;
+                cycle = count - loopRemaining - 1;
+            }
+
+            cache[id] = cycle++;
+        }
+    }
 }
 
 public record struct DPoint(int x, int y);

@@ -12,25 +12,11 @@ class d14 : baseD
         Console.WriteLine(sum); // part 1
 
         lines = File.ReadLines(@"..\..\..\inputs\14.txt").ToList();
-        var cache = new Dictionary<int, int>();
-        var cycle = 1;
-        while (cycle <= 1_000_000_000)
+        loopCycle(1_000_000_000, () =>
         {
             doCycle();
-
-            var id = getPoints(lines).GetHash();
-
-            if (cache.TryGetValue(id, out var cached))
-            {
-                var remaining = 1_000_000_000 - cycle - 1;
-                var loop = cycle - cached;
-
-                var loopRemaining = remaining % loop;
-                cycle = 1_000_000_000 - loopRemaining - 1;
-            }
-
-            cache[id] = cycle++;
-        }
+            return getPoints(lines).GetHash();
+        });
         sum = getSum(lines);
         Console.WriteLine(sum); // part 2
 
@@ -204,9 +190,9 @@ class d14 : baseD
         int getSum(List<string> lines)
         {
             int sum = 0;
-            for (var i = lines.Count; i > 0; i--)
+            for (var i = 0; i < lines.Count; i++)
             {
-                sum += lines[^i].Count(c => c == 'O') * i;
+                sum += lines[i].Count(c => c == 'O') * (lines.Count - i);
             }
             return sum;
         }
