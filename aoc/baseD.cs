@@ -51,12 +51,12 @@ public class DCache<TKey, TValue>
     private readonly Dictionary<TKey, TValue> dict = new Dictionary<TKey, TValue>();
     public TValue Get(TKey key, Func<TValue> getValue)
     {
-        if (dict.ContainsKey(key))
+        if (dict.TryGetValue(key, out var value))
         {
-            return dict[key];
+            return value;
         }
         
-        var value = getValue();
+        value = getValue();
         dict[key] = value;
         return value;
     }
