@@ -45,3 +45,19 @@ abstract class baseD
 }
 
 public record struct DPoint(int x, int y);
+
+public class DCache<TKey, TValue>
+{
+    private readonly Dictionary<TKey, TValue> dict = new Dictionary<TKey, TValue>();
+    public TValue Get(TKey key, Func<TValue> getValue)
+    {
+        if (dict.ContainsKey(key))
+        {
+            return dict[key];
+        }
+        
+        var value = getValue();
+        dict[key] = value;
+        return value;
+    }
+}
