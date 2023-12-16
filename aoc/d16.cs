@@ -1,11 +1,22 @@
 ﻿class d16 : baseD
 {
     char[][] plane = File.ReadLines(@"..\..\..\inputs\16.txt").Select(x => x.ToCharArray()).ToArray();
-    
+
     public void Run()
     {
+        var sum = RunSimulation(new D16Point(-1, 0, Dirs.E));
+        Console.WriteLine(sum); // part 1
+
+        var max1 = Enumerable.Range(0, plane.Length - 1).Select(y => RunSimulation(new D16Point(-1, y, Dirs.E))).Max();
+        var max2 = Enumerable.Range(0, plane.Length - 1).Select(y => RunSimulation(new D16Point(plane[0].Length, y, Dirs.W))).Max();
+        var max3 = Enumerable.Range(0, plane[0].Length - 1).Select(x => RunSimulation(new D16Point(x, -1, Dirs.S))).Max();
+        var max4 = Enumerable.Range(0, plane[0].Length - 1).Select(x => RunSimulation(new D16Point(x, plane.Length, Dirs.N))).Max();
+        Console.WriteLine(new[] { max1, max2, max3, max4 }.Max()); // part 2
+    }
+
+    public int RunSimulation(D16Point start)
+    {
         var seen = new HashSet<D16Point>();
-        var start = new D16Point(-1, 0, Dirs.E);
         var curs = new Queue<D16Point>();
         curs.Enqueue(start);
 
@@ -22,8 +33,7 @@
             }
         }
 
-        var sum = seen.Select(x => new DPoint(x.x, x.y)).Distinct().Count() - 1;
-        Console.WriteLine(sum); // part 1
+        return seen.Select(x => new DPoint(x.x, x.y)).Distinct().Count() - 1;
     }
 
     IEnumerable<D16Point> nextPos(D16Point point)
@@ -36,17 +46,17 @@
             Dirs.W => point with { x = point.x - 1 },
         };
 
-        if (next.x >= 0 && next.x < plane[0].Length && next.y >= 0 && next.y < plane.Length) 
-        { 
+        if (next.x >= 0 && next.x < plane[0].Length && next.y >= 0 && next.y < plane.Length)
+        {
             var p = plane[next.y][next.x];
             if (p == '.') yield return next;
             else if (next.dir == Dirs.N || next.dir == Dirs.S)
             {
                 if (p == '|') yield return next;
-                else if (p == '-') 
-                { 
-                    yield return next with { dir = Dirs.W }; ; 
-                    yield return next with { dir = Dirs.E }; ; 
+                else if (p == '-')
+                {
+                    yield return next with { dir = Dirs.W }; ;
+                    yield return next with { dir = Dirs.E }; ;
                 }
                 else
                 {
