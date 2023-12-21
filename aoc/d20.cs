@@ -3,6 +3,10 @@
     public static Dictionary<string, Module> modules = new Dictionary<string, Module>();
     public static Queue<Action> actions = new Queue<Action>();
     public static Dictionary<bool, long> pulses = new Dictionary<bool, long>() { { false, 0 }, { true, 0 } };
+    public static Dictionary<string, long> input = new Dictionary<string, long>()
+    {
+        { "xj", 0 }, { "qs", 0 }, { "kz", 0 }, { "km", 0 }
+    };
 
     public void Run()
     {
@@ -34,8 +38,23 @@
             modules.Add(endPoint, new Output(endPoint, null));
         }
 
-        for (var i = 0; i < 1000; i++)
+        //for (var i = 0; i < 1000; i++)
+        //{
+        //    actions.Enqueue(() => modules["broadcaster"].Run(null, false));
+        //    while (actions.Any())
+        //    {
+        //        var action = actions.Dequeue();
+        //        action();
+        //    }
+        //}
+        //Console.WriteLine(pulses[false] * pulses[true]); // part 1
+
+        var idx = 0;
+        var gq = modules["gq"] as Conjunction;
+        gq.getCount = () => idx;
+        while (input.Values.Any(x => x == 0))
         {
+            idx++;
             actions.Enqueue(() => modules["broadcaster"].Run(null, false));
             while (actions.Any())
             {
@@ -43,8 +62,7 @@
                 action();
             }
         }
-
-        Console.WriteLine(pulses[false] * pulses[true]); // part 1
+        Console.WriteLine(Numerics.Lcm(input.Values)); // part 2
     }
 
     public abstract class Module
@@ -96,6 +114,8 @@
 
     public class Conjunction : Module
     {
+        public Func<int> getCount;
+
         public Dictionary<string, bool> LastReceived { get; set; }
 
         public Conjunction(string name, List<string> endPoints) : base(name, endPoints) { }
@@ -103,9 +123,14 @@
         public override void Run(string from, bool high)
         {
             CountPulse(high);
+
             actions.Enqueue(() =>
             {
                 LastReceived[from] = high;
+                if (Name == "gq" && high)
+                {
+                    if (input[from] == 0) input[from] = getCount();
+                }
                 EndPoints.ForEach(ep => modules[ep].Run(Name, !LastReceived.Values.All(x => x)));
             });
         }
