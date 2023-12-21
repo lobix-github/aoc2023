@@ -12,7 +12,7 @@ class d14 : baseD
         Console.WriteLine(sum); // part 1
 
         lines = File.ReadLines(@"..\..\..\inputs\14.txt").ToList();
-        loopCycle(1_000_000_000, () =>
+        loopCycle(1_000_000_000, (_) =>
         {
             doCycle();
             return GetHash(getPoints(lines));

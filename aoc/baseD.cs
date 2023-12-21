@@ -24,21 +24,21 @@ abstract class baseD
         return result;
     }
 
-    protected void loopCycle<T>(int count, Func<T> jobReturningCacheKey)
+    protected void loopCycle<T>(int count, Func<int, T> jobReturningCacheKey)
     {
         var cache = new Dictionary<T, int>();
         var cycle = 1;
         while (cycle <= count)
         {
-            var id = jobReturningCacheKey();
+            var id = jobReturningCacheKey(cycle);
 
             if (cache.TryGetValue(id, out var cached))
             {
-                var remaining = count - cycle - 1;
+                var remaining = count - cycle;
                 var loop = cycle - cached;
 
                 var loopRemaining = remaining % loop;
-                cycle = count - loopRemaining - 1;
+                cycle = count - loopRemaining;
             }
 
             cache[id] = cycle++;
@@ -106,6 +106,19 @@ public class DCache<TKey, TValue>
         value = getValue();
         dict[key] = value;
         return value;
+    }
+}
+
+public class HashedHashSet<T> : HashSet<T>
+{
+    public override int GetHashCode()
+    {
+        var hash = 0;
+        foreach (var item in this)
+        {
+            hash ^= item.GetHashCode();
+        }
+        return hash;
     }
 }
 
