@@ -1,4 +1,6 @@
-﻿class d16 : baseD
+﻿using System.Drawing;
+
+class d16 : baseD
 {
     char[][] plane = File.ReadLines(@"..\..\..\inputs\16.txt").Select(x => x.ToCharArray()).ToArray();
 
@@ -33,7 +35,7 @@
             }
         }
 
-        return seen.Select(x => new DPoint(x.x, x.y)).Distinct().Count() - 1;
+        return seen.Select(x => new Point(x.x, x.y)).Distinct().Count() - 1;
     }
 
     IEnumerable<D16Point> nextPos(D16Point point)
