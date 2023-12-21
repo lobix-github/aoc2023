@@ -1,8 +1,10 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Numerics;
 
 abstract class baseD
 {
     protected int ToInt(string val) => Convert.ToInt32(val);
+    protected int ToIntFromHex(string val) => Convert.ToInt32(val, 16);
     protected long ToLong(string val) => Convert.ToInt64(val);
     protected BigInteger ToBigInt(string val) => BigInteger.Parse(val);
 
@@ -42,9 +44,54 @@ abstract class baseD
             cache[id] = cycle++;
         }
     }
-}
 
-public record struct DPoint(int x, int y);
+    protected long calculateInners(HashSet<Point> plain)
+    {
+        var minX = plain.Select(x => x.X).Min();
+        var minY = plain.Select(x => x.Y).Min();
+        var maxX = plain.Select(x => x.X).Max();
+        var maxY = plain.Select(x => x.Y).Max();
+
+        var gr = plain.GroupBy(x => x.Y).OrderBy(g => g.Key).ToArray();
+        long sum = 0;
+        if (maxY - minY + 1 != gr.Count()) throw new Exception("sie zesralo");
+        for (var i = 0; i < gr.Count(); i++)
+        {
+            var g = gr[i];
+            var inner = true;
+            var xs = g.OrderBy(p => p.X).ToArray();
+            if (xs.Length > 1)
+            {
+                int? firstXInSeries = null;
+                for (var idx = 1; idx < xs.Length; idx++)
+                {
+                    var prev = xs[idx - 1].X;
+                    var cur = xs[idx].X;
+
+                    if (prev == cur - 1)
+                    {
+                        if (firstXInSeries == null) firstXInSeries = prev;
+                        continue;
+                    }
+
+                    if (firstXInSeries != null)
+                    {
+                        var differentDir = plain.Contains(new Point(firstXInSeries.Value, g.Key + 1)) ^ plain.Contains(new Point(prev, g.Key + 1));
+                        if (!differentDir) inner = !inner;
+                        firstXInSeries = null;
+                    }
+
+                    if (inner)
+                    {
+                        sum += cur - prev - 1;
+                    }
+                    inner = !inner;
+                }
+            }
+        }
+        return sum;
+    }
+}
 
 public class DCache<TKey, TValue>
 {

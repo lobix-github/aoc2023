@@ -1,9 +1,10 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Drawing;
+using System.Text.RegularExpressions;
 
 abstract class d03 : baseD
 {
     protected List<string> plane = new List<string>();
-    protected HashSet<DPoint> symbols = new HashSet<DPoint>();
+    protected HashSet<Point> symbols = new HashSet<Point>();
 
     public void Run()
     {
@@ -14,15 +15,15 @@ abstract class d03 : baseD
     abstract protected int Count();
 
     protected bool IsDigit(char c) => !new[] { '*', '.' }.Contains(c);
-    protected bool IsOK(int x, int y, IEnumerable<DPoint> second) => new[] {
-        new DPoint(x - 1, y),
-        new DPoint(x + 1, y),
-        new DPoint(x, y - 1),
-        new DPoint(x, y + 1),
-        new DPoint(x - 1, y - 1),
-        new DPoint(x - 1, y + 1),
-        new DPoint(x + 1, y - 1),
-        new DPoint(x + 1, y + 1),
+    protected bool IsOK(int x, int y, IEnumerable<Point> second) => new[] {
+        new Point(x - 1, y),
+        new Point(x + 1, y),
+        new Point(x, y - 1),
+        new Point(x, y + 1),
+        new Point(x - 1, y - 1),
+        new Point(x - 1, y + 1),
+        new Point(x + 1, y - 1),
+        new Point(x + 1, y + 1),
     }.Intersect(second).Any();
 }
 
@@ -40,7 +41,7 @@ class d03_1 : d03
             {
                 if (plane[y][x] == '*')
                 {
-                    symbols.Add(new DPoint(x, y));
+                    symbols.Add(new Point(x, y));
                 }
             }
         }
@@ -76,7 +77,7 @@ class d03_2 : d03
 {
     protected override int Count()
     {
-        Dictionary<string, HashSet<DPoint>> numbers = new Dictionary<string, HashSet<DPoint>>();
+        Dictionary<string, HashSet<Point>> numbers = new Dictionary<string, HashSet<Point>>();
         var sum = 0;
         plane = File.ReadLines(@"..\..\..\inputs\03.txt").Select(x => Regex.Replace(x, "[^0-9.*]+", x => ".")).ToList();
         var N = plane.Count;
@@ -87,7 +88,7 @@ class d03_2 : d03
             {
                 if (plane[y][x] == '*')
                 {
-                    symbols.Add(new DPoint(x, y));
+                    symbols.Add(new Point(x, y));
                 }
             }
         }
@@ -100,11 +101,11 @@ class d03_2 : d03
                 {
                     string num = string.Empty;
                     num += plane[y][x];
-                    var set = new HashSet<DPoint> { new DPoint(x, y) };
+                    var set = new HashSet<Point> { new Point(x, y) };
                     while (++x < N && IsDigit(plane[y][x]))
                     {
                         num += plane[y][x];
-                        set.Add(new DPoint(x, y));
+                        set.Add(new Point(x, y));
                     }
                     var id = $"{Guid.NewGuid()}_{num}";
                     numbers[id] = set;
@@ -115,7 +116,7 @@ class d03_2 : d03
 
         foreach (var symbol in symbols)
         {
-            var res = numbers.Select(num => IsOK(symbol.x, symbol.y, num.Value) ? num : new KeyValuePair<string, HashSet<DPoint>>("bad", null)).Where(x => x.Key != "bad").ToList();
+            var res = numbers.Select(num => IsOK(symbol.X, symbol.Y, num.Value) ? num : new KeyValuePair<string, HashSet<Point>>("bad", null)).Where(x => x.Key != "bad").ToList();
             if (res.Count() == 2)
             {
                 sum += ToInt(res[0].Key.Substring(res[0].Key.IndexOf('_') + 1)) * ToInt(res[1].Key.Substring(res[1].Key.IndexOf('_') + 1));

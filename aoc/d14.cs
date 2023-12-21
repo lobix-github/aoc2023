@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Drawing;
+using System.Text;
 
 class d14 : baseD
 {
@@ -169,9 +170,9 @@ class d14 : baseD
             }
         }
 
-        HashSet<DPoint> getPoints(List<string> lines)
+        HashSet<Point> getPoints(List<string> lines)
         {
-            var result = new HashSet<DPoint>();
+            var result = new HashSet<Point>();
             for (int y = 0; y < lines.Count; y++)
             {
                 var line = lines[y];
@@ -179,7 +180,7 @@ class d14 : baseD
                 {
                     if (line[x] == 'O')
                     {
-                        result.Add(new DPoint(x, y));
+                        result.Add(new Point(x, y));
                     }
                 }
             }
@@ -187,6 +188,6 @@ class d14 : baseD
         }
 
         int getSum(List<string> lines) => lines.Select((l, i) => (l, i)).Sum(x => x.l.Count(c => c == 'O') * (lines.Count - x.i));
-        int GetHash(HashSet<DPoint> points) => points.Aggregate(0, (hash, point) => hash ^= point.GetHashCode());
+        int GetHash(HashSet<Point> points) => points.Aggregate(0, (hash, point) => hash ^= point.GetHashCode());
     }
 }
