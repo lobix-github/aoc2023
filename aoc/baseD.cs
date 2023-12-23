@@ -149,7 +149,7 @@ public record class Point3D(int x, int y, int z) : ICopy<Point3D>
     public Point3D Copy() => new Point3D(x, y, z);
 }
 
-public record class Vector3D(Point3D start, Point3D end) : ICopy<Vector3D>
+public record Vector3D(Point3D start, Point3D end) : ICopy<Vector3D>
 {
     public bool IsIntersectingXY(Vector3D v) => XS.Intersect(v.XS).Any() && YS.Intersect(v.YS).Any();
 
