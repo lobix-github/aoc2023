@@ -111,6 +111,10 @@ public class DCache<TKey, TValue>
 
 public class HashedHashSet<T> : HashSet<T>
 {
+    public HashedHashSet(IEnumerable<T> collection) : base(collection) { }
+
+    public HashedHashSet() { }
+
     public override int GetHashCode()
     {
         var hash = 0;
@@ -120,6 +124,16 @@ public class HashedHashSet<T> : HashSet<T>
         }
         return hash;
     }
+
+}
+
+public class CopyableHashedHashSet<T> : HashedHashSet<T> where T : ICopy<T>
+{
+    public CopyableHashedHashSet(IEnumerable<T> collection) : base(collection) { }
+
+    public CopyableHashedHashSet() { }
+
+    public CopyableHashedHashSet<T> Copy() => new CopyableHashedHashSet<T>(this.Select(x => x.Copy()));
 }
 
 public enum Dirs
@@ -128,4 +142,26 @@ public enum Dirs
     E = 1,
     S = 2,
     W = 3
+}
+
+public record class Point3D(int x, int y, int z) : ICopy<Point3D>
+{
+    public Point3D Copy() => new Point3D(x, y, z);
+}
+
+public record class Vector3D(Point3D start, Point3D end) : ICopy<Vector3D>
+{
+    public bool IsIntersectingXY(Vector3D v) => XS.Intersect(v.XS).Any() && YS.Intersect(v.YS).Any();
+
+    private IEnumerable<int> XS => Enumerable.Range(start.x, end.x - start.x + 1);
+    private IEnumerable<int> YS => Enumerable.Range(start.y, end.y - start.y + 1);
+
+    public Vector3D SetZ(int z) => new Vector3D(new Point3D(start.x, start.y, z), new Point3D(end.x, end.y, end.z - start.z + z));
+
+    public Vector3D Copy() => new Vector3D(start.Copy(), end.Copy());
+}
+
+public interface ICopy<T>
+{
+    T Copy();
 }
