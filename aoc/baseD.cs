@@ -144,6 +144,11 @@ public enum Dirs
     W = 3
 }
 
+public record DPoint(int X, int Y) : ICopy<DPoint>
+{
+    public DPoint Copy() => new DPoint(X, Y);
+}
+
 public record class Point3D(int x, int y, int z) : ICopy<Point3D>
 {
     public Point3D Copy() => new Point3D(x, y, z);
